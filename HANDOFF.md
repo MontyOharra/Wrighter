@@ -2,7 +2,7 @@
 
 This file is the entry point for resuming work on Wrighter from a fresh session. Read this first; follow the links into the deeper artifacts as needed.
 
-Last updated: 2026-04-26.
+Last updated: 2026-04-28.
 
 ---
 
@@ -38,6 +38,11 @@ For depth: read [RESEARCH.md](./RESEARCH.md) (competitive landscape) and [decisi
 6. **[Speculative branching](./decisions/0006-speculative-branching.md)** — First-class graph primitive. Lifecycle states: `speculative` / `committed` / `superseded`. Discarded branches become auto-ADRs.
 7. **[Cascade edges](./decisions/0007-cascade-edges.md)** — Hebbian-strengthened lateral edges between nodes that consistently co-change. Deferred to V1.
 8. **[Stack](./decisions/0008-stack-electron-typescript.md)** — Electron + TypeScript end-to-end for V0. React + React Flow for the graph UI. SQLite + sqlite-vec for storage. Reconsider Rust at V2.
+9. **[Propagation on commit](./decisions/0009-propagation-on-commit.md)** — V0-mandatory, agent-judged, all directions (up/down/sideways). Proposed, never auto-applied.
+10. **[Overseer + typed agents](./decisions/0010-overseer-typed-agents.md)** — Supervisor pattern. One overseer with global graph view orchestrates the per-type workers from ADR 0004.
+11. **[Re-fork mechanics](./decisions/0011-refork-mechanics.md)** — Two distinct actions: "explore alternative" (non-destructive) vs. "reopen decision" (destructive). Lifecycle is per-fork-generation.
+12. **[Provider abstraction](./decisions/0012-provider-abstraction.md)** — `LLMProvider` interface with capability flags. Native `@anthropic-ai/sdk` for Anthropic; Vercel AI SDK for everything else. Overseer pinned to frontier models.
+13. **[Claude Code as a provider](./decisions/0013-claude-code-provider.md)** — First-class provider via Claude Agent SDK. Auto-detects user auth, inherits MCP servers/hooks, removes API-key friction.
 
 ---
 

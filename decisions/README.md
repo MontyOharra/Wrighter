@@ -28,5 +28,10 @@ This is also what V0's markdown emission should look like for any project. We're
 - [0006 — Speculative branching as a graph primitive](0006-speculative-branching.md)
 - [0007 — Cascade detection via Hebbian-strengthened lateral edges](0007-cascade-edges.md)
 - [0008 — Stack: Electron + TypeScript for V0](0008-stack-electron-typescript.md)
+- [0009 — Propagation on commit: V0-mandatory, agent-judged, all directions](0009-propagation-on-commit.md)
+- [0010 — Overseer + typed-agents architecture (supervisor pattern)](0010-overseer-typed-agents.md)
+- [0011 — Re-fork mechanics: explore vs. reopen](0011-refork-mechanics.md)
+- [0012 — Provider abstraction + multi-provider strategy](0012-provider-abstraction.md)
+- [0013 — Claude Code as a first-class provider](0013-claude-code-provider.md)
 
 See also: [/open-questions.md](../open-questions.md), [/v0-architecture-sketch.md](../v0-architecture-sketch.md), [/RESEARCH.md](../RESEARCH.md).
