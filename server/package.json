@@ -1,0 +1,26 @@
+{
+  "name": "@wrighter/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Wrighter backend. Runs as a standalone Node process during dev; loaded by Electron's main process at ship time.",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.123",
+    "@anthropic-ai/sdk": "^0.91.1",
+    "@hono/node-server": "^1.13.7",
+    "@wrighter/shared": "*",
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "~6.0.2"
+  }
+}

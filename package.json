@@ -1,0 +1,22 @@
+{
+  "name": "wrighter",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Visual graph workspace for software-architecture thinking. See HANDOFF.md.",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm run -w @wrighter/server dev",
+    "dev:web": "npm run -w @wrighter/web dev",
+    "build": "npm run --workspaces --if-present build",
+    "typecheck": "npm run --workspaces --if-present typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "~6.0.2"
+  }
+}
