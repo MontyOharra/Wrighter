@@ -5,10 +5,10 @@ import { SettingsArea } from "./SettingsArea";
 import { Terminal } from "./Terminal";
 
 const RING_LINE_WIDTH = 2;
-const PROXIMITY_RAMP_DISTANCE = 400;
-const BASELINE_INTENSITY = 0.15;
-const PER_ORB_MAX_PARTICLES = 200;
-const MAX_SPAWN_PER_FRAME = 5;
+const PROXIMITY_RAMP_DISTANCE = 160;
+const BASELINE_INTENSITY = 0;
+const PER_ORB_MAX_PARTICLES = 30;
+const MAX_SPAWN_PER_FRAME = 1;
 const PARTICLE_FRICTION = 0.985;
 const RADIUS_LERP = 0.1;
 
@@ -358,11 +358,16 @@ export function OpeningScene({ onForge }: OpeningSceneProps) {
     return <SettingsArea visible={areaVisible} />;
   };
 
-  const showWordmark = mode === "menu" && !forging;
-  const showBackButton = mode !== "menu" && !forging;
-  const showIcon = mode === "menu" && !transitioning && !forging;
+  // Icons/wordmark/labels stay visible while the active orb is still growing — it physically
+  // covers them via z-index + bg-black. They only "disappear" once they're hidden behind it.
+  // On contraction (mode flips to "menu" instantly), they re-show right away and get revealed
+  // as the orb shrinks back. The back button is the inverse: only appears after expansion fully
+  // completes, and disappears the moment contraction begins.
+  const menuChromeVisible = (mode === "menu" || transitioning) && !forging;
+  const showWordmark = !forging;
   const showCornerChrome = !forging;
-  const showOrbLabels = !forging;
+  const showOrbLabels = menuChromeVisible;
+  const showCloseButton = mode !== "menu" && !transitioning && !forging;
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
@@ -373,17 +378,6 @@ export function OpeningScene({ onForge }: OpeningSceneProps) {
           <div className="text-gray-300 tracking-[0.18em]">WRIGHTER</div>
           <div className="text-gray-600">v0 · early access</div>
         </div>
-      )}
-
-      {showBackButton && (
-        <button
-          type="button"
-          onClick={handleBack}
-          className="absolute top-4 left-5 z-50 font-mono text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
-        >
-          <span className="text-base leading-none">←</span>
-          <span>back</span>
-        </button>
       )}
 
       {showCornerChrome && (
@@ -435,10 +429,36 @@ export function OpeningScene({ onForge }: OpeningSceneProps) {
         </>
       )}
 
+      {/* Icons live OUTSIDE the orb divs and stay anchored at the menu-state coordinates,
+          so they don't track the active orb's box as it expands or contracts. The growing
+          orb (z-30 + bg-black) covers them on expand; on contract they sit at their final
+          resting spot from the first frame. */}
+      {menuChromeVisible &&
+        ORBS.map((config) => {
+          if (config.id === mode) return null;
+          const Icon =
+            config.id === "new" ? PlusIcon : config.id === "settings" ? SettingsIcon : ProjectsIcon;
+          const size = config.baseRadius * 2;
+          return (
+            <div
+              key={`icon-${config.id}`}
+              className="absolute flex items-center justify-center pointer-events-none text-white opacity-85"
+              style={{
+                left: `calc(50% + ${config.offsetX}px)`,
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                width: `${size}px`,
+                height: `${size}px`,
+                zIndex: 15,
+              }}
+            >
+              <Icon className={config.id === "new" ? "w-8 h-8" : "w-5 h-5"} />
+            </div>
+          );
+        })}
+
       {ORBS.map((config) => {
         const isActive = config.id === mode;
-        const Icon =
-          config.id === "new" ? PlusIcon : config.id === "settings" ? SettingsIcon : ProjectsIcon;
         const elevated = isOrbElevated(config.id);
         const borderColor = isActive && forging ? IDEA_COLOR : "#ffffff";
         return (
@@ -453,10 +473,18 @@ export function OpeningScene({ onForge }: OpeningSceneProps) {
               zIndex: elevated ? 30 : 10,
             }}
           >
-            {showIcon && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-white opacity-85">
-                <Icon className={config.id === "new" ? "w-8 h-8" : "w-5 h-5"} />
-              </div>
+            {isActive && showCloseButton && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBack();
+                }}
+                aria-label="close"
+                className="absolute top-2 right-3 z-50 font-mono text-lg leading-none text-white cursor-pointer w-6 h-6 flex items-center justify-center"
+              >
+                ×
+              </button>
             )}
 
             {isActive && renderArea(config.id)}

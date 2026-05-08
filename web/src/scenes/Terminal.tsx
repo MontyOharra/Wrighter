@@ -152,9 +152,17 @@ export function Terminal({ visible, onCommit }: TerminalProps) {
 
   const promptGlyph = phase === "naming" ? "title:" : ">";
 
+  const focusInput = () => {
+    // Don't steal focus from text selection or button presses.
+    const sel = window.getSelection();
+    if (sel && sel.toString().length > 0) return;
+    inputRef.current?.focus();
+  };
+
   return (
     <div
-      className="absolute inset-0 flex flex-col font-mono text-sm text-white px-4 py-3 overflow-hidden"
+      onClick={focusInput}
+      className="absolute inset-0 flex flex-col font-mono text-sm text-white px-4 py-3 overflow-hidden cursor-text"
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 350ms ease-out",
