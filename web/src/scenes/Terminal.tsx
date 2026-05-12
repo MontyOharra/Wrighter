@@ -2,6 +2,21 @@ import type { ChatMessage } from "@wrighter/shared";
 import { useEffect, useRef, useState } from "react";
 import { forgeIdea } from "../api/client";
 
+const TEXTAREA_MAX_HEIGHT = 200;
+
+function Spinner() {
+  return (
+    <span className="inline-flex items-center gap-2 text-gray-500">
+      <span
+        className="inline-block w-3 h-3 rounded-full border border-gray-600 border-t-gray-300 animate-spin"
+        style={{ animationDuration: "0.8s" }}
+        aria-hidden
+      />
+      <span className="italic">thinking…</span>
+    </span>
+  );
+}
+
 interface UIMessage extends ChatMessage {
   pending?: boolean;
 }
@@ -32,7 +47,7 @@ export function Terminal({ visible, onCommit }: TerminalProps) {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [phase, setPhase] = useState<Phase>("chat");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const conversationIdRef = useRef<string>(newId());
 
@@ -52,6 +67,16 @@ export function Terminal({ visible, onCommit }: TerminalProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, [phase]);
+
+  // Auto-grow the textarea upward as content overflows. Capped at TEXTAREA_MAX_HEIGHT;
+  // beyond that it scrolls internally rather than pushing further into the chat area.
+  useEffect(() => {
+    const ta = inputRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    const next = Math.min(ta.scrollHeight, TEXTAREA_MAX_HEIGHT);
+    ta.style.height = `${next}px`;
+  }, [input]);
 
   const startCommit = () => {
     if (streaming || phase !== "chat") return;
@@ -183,9 +208,15 @@ export function Terminal({ visible, onCommit }: TerminalProps) {
             <span className="text-gray-500 select-none mr-2">
               {m.role === "user" ? ">" : m.role === "system" ? "//" : "::"}
             </span>
-            <span className="whitespace-pre-wrap">{m.content}</span>
-            {m.pending && (
-              <span className="inline-block w-1.5 h-3.5 ml-1 -mb-0.5 bg-gray-400 animate-pulse" />
+            {m.pending && m.content === "" ? (
+              <Spinner />
+            ) : (
+              <>
+                <span className="whitespace-pre-wrap">{m.content}</span>
+                {m.pending && (
+                  <span className="inline-block w-1.5 h-3.5 ml-1 -mb-0.5 bg-gray-400 animate-pulse" />
+                )}
+              </>
             )}
           </div>
         ))}
@@ -193,14 +224,22 @@ export function Terminal({ visible, onCommit }: TerminalProps) {
           <div className="text-gray-400 mt-3">// what should this idea node be called?</div>
         )}
       </div>
-      <form onSubmit={handleSubmit} className="mt-2 flex items-center gap-2">
-        <span className="text-gray-500 select-none">{promptGlyph}</span>
-        <input
+      <form onSubmit={handleSubmit} className="mt-2 flex items-end gap-2">
+        <span className="text-gray-500 select-none pb-[2px]">{promptGlyph}</span>
+        <textarea
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit(e);
+            }
+          }}
           disabled={streaming && phase === "chat"}
-          className="flex-1 bg-transparent outline-none border-none text-white caret-white placeholder-gray-600 disabled:opacity-50"
+          rows={1}
+          className="flex-1 bg-transparent outline-none border-none text-white caret-white placeholder-gray-600 disabled:opacity-50 resize-none overflow-y-auto leading-relaxed"
+          style={{ maxHeight: `${TEXTAREA_MAX_HEIGHT}px` }}
           placeholder=""
           spellCheck={false}
           autoComplete="off"
