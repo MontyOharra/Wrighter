@@ -9,7 +9,19 @@ import { createForgeRoutes } from "./routes/forge";
 
 const app = new Hono();
 
-app.use("/*", cors({ origin: env.WEB_ORIGIN }));
+// Vite picks a fallback port (5174, 5175, …) when 5173 is taken, so accept any
+// localhost origin in dev. WEB_ORIGIN can still pin a specific origin in prod.
+app.use(
+  "/*",
+  cors({
+    origin: (origin) => {
+      if (!origin) return origin;
+      if (origin === env.WEB_ORIGIN) return origin;
+      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return origin;
+      return null;
+    },
+  }),
+);
 
 let provider: LLMProvider | null = null;
 let providerNote = "";
